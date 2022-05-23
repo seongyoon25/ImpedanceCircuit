@@ -20,7 +20,8 @@ class Circuit:
 
 
 def build_circuit(circuit):
-    # circuit = 'l-r-[r,cpe]-[r-cpe,cpe]'
+    # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
+    # circuit = 'l-(cpe,(cpe,r)-r)-r-(cpe,r)'
     
     def circuit_func(frequency, *parameters):
         omega = 2*np.pi*frequency
