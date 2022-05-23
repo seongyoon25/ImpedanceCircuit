@@ -4,14 +4,13 @@ from scipy.optimize import curve_fit
 
 
 class Circuit:
-    def __init__(self, circuit) -> None:
+    def __init__(self, circuit):
         # circuit = 'r-[r,cpe]-[r-cpe,cpe]'
         circuit = circuit.replace(' ', '')
         self.circuit = circuit
 
         circuit_func = build_circuit(self.circuit)
         self.circuit_func = circuit_func
-        return self
 
     def fit(self, frequency, impedance):
         parameters = fit_circuit(frequency, impedance)
