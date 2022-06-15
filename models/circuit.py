@@ -5,7 +5,7 @@ from scipy.optimize import curve_fit
 
 class Circuit:
     def __init__(self, circuit):
-        # circuit = 'r-[r,cpe]-[r-cpe,cpe]'
+        # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
         circuit = circuit.replace(' ', '')
         self.circuit = circuit
 
