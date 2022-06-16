@@ -34,3 +34,4 @@ def build_circuit(circuit):
 def fit_circuit(frequency, impedance):
     parameters, _ = curve_fit(frequency, impedance)
     return parameters
+
