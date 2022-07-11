@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
+from elements import R, C, L, CPE, p
+
 
 class Circuit:
     def __init__(self, circuit):
@@ -23,8 +25,14 @@ def build_circuit(circuit):
     # circuit = 'l-(cpe,(cpe,r)-r)-r-(cpe,r)'
 
     def circuit_func(frequency, *parameters):
-        omega = 2*np.pi*frequency
-        z = omega*parameters[0]
+        parameters = np.array(parameters).tolist()
+        # Temporarily fixed circuit
+        z = L(parameters[0], frequency) + \
+            R(parameters[1], frequency) + \
+            p([R(parameters[2], frequency),
+               CPE(parameters[3], frequency)]) + \
+            p([R(parameters[4], frequency) + CPE(parameters[5], frequency),
+               CPE(parameters[6], frequency)])
         z_real = np.real(z)
         z_imag = np.imag(z)
         return np.stack([z_real, z_imag], 1)
@@ -34,4 +42,3 @@ def build_circuit(circuit):
 def fit_circuit(frequency, impedance):
     parameters, _ = curve_fit(frequency, impedance)
     return parameters
-
