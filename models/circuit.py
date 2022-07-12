@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
-from elements import R, C, L, CPE, p
+from impedance.elements import R, C, L, CPE, p
 
 
 class Circuit:
@@ -15,7 +15,7 @@ class Circuit:
         self.circuit_func = circuit_func
 
     def fit(self, frequency, impedance):
-        parameters = fit_circuit(frequency, impedance)
+        parameters = fit_circuit(self.circuit_func, frequency, impedance)
         self.parameters = parameters
         return self
 
@@ -39,6 +39,6 @@ def build_circuit(circuit):
     return circuit_func
 
 
-def fit_circuit(frequency, impedance):
-    parameters, _ = curve_fit(frequency, impedance)
+def fit_circuit(circuit_func, frequency, impedance):
+    parameters, _ = curve_fit(circuit_func, frequency, impedance)
     return parameters
