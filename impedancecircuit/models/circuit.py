@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
-from impedance.elements import R, C, L, CPE, p
+from impedancecircuit.models.elements import R, C, L, CPE, p
 
 
 class Circuit:
