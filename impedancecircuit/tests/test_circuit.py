@@ -30,9 +30,6 @@ def test_circuit():
     print(circuit.parameters)
     impedance_pred = circuit.predict(data_freq)
     print(impedance_pred)
-    plt.plot(data_real, data_imag, '.')
-    plt.plot(impedance_pred[:len(impedance_pred)//2], impedance_pred[len(impedance_pred)//2:], '-')
-    plt.show()
 
 
 test_circuit()
