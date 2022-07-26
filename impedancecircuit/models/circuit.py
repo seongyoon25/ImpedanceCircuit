@@ -6,12 +6,12 @@ from impedancecircuit.models.elements import R, C, L, CPE, p
 
 
 class Circuit:
-    def __init__(self, circuit):
+    def __init__(self, circuit, parameters=None):
         # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
         circuit = circuit.replace(' ', '')
         self.circuit = circuit
 
-        circuit_func, parameters = build_circuit(self.circuit)
+        circuit_func, parameters = build_circuit(self.circuit, parameters)
         self.circuit_func = circuit_func
         self.parameters_init = np.array(parameters)
 
@@ -25,15 +25,24 @@ class Circuit:
         return impedance
 
 
-def build_circuit(circuit):
+def build_circuit(circuit, parameters=None):
     # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
     # circuit = 'l-(cpe,(cpe,r)-r)-r-(cpe,r)'
+    circuit_list = ['l', 'r', 'r', 'cpe', 'r', 'cpe', 'cpe']
 
     # initial parameters will be determined after circuit is identified.
-    parameters = np.ones(10)
+    if parameters is None:
+        parameters = np.zeros(10)
+    sigmoid_idx = np.zeros(len(parameters), dtype=int)
+    sigmoid_idx[[4, 7, 9]] = 1
 
     def circuit_func(frequency, *parameters):
-        parameters = np.array(parameters).tolist()
+        parameters = np.array(parameters)
+        parameters = np.where(sigmoid_idx, 
+                              sigmoid(parameters), 
+                              softplus(parameters))
+        # parameters[sigmoid_idx] = sigmoid(parameters[sigmoid_idx])
+        # parameters[softplus_idx] = softplus(parameters[softplus_idx])
         # Temporarily fixed circuit
         z = L([parameters[0]], frequency) + \
             R([parameters[1]], frequency) + \
@@ -52,3 +61,12 @@ def fit_circuit(circuit_func, parameters, frequency, impedance):
     parameters, _ = curve_fit(circuit_func, frequency, impedance,
                               p0=parameters)
     return parameters
+
+
+def sigmoid(x):
+    return 1./(1.+np.exp(-x))
+
+
+def softplus(x):
+    # return np.log(1.+np.exp(x))
+    return np.log(1.+np.exp(-np.abs(x))) + np.maximum(x, 0)
