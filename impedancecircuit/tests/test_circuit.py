@@ -23,10 +23,12 @@ impedance = np.concatenate([data_real, data_imag])
 
 
 def test_circuit():
-    circuit_str = 'l-r-(r,cpe)-(r-cpe,cpe)'
+    circuit_str = 'l-r-(r,cpe)-(r-cpe)-cpe'
     # circuit = Circuit(circuit_str)
     custom_initial_guess = np.zeros(10)
-    custom_initial_guess[1] = np.log(np.exp(min(data_real)) - 1)
+    custom_initial_guess[1] = np.log(min(data_real))
+    custom_initial_guess[0] = np.log(abs(data_imag[np.argmin(data_real)]) /
+                                     (2*np.pi*data_freq[np.argmin(data_real)]))
     circuit = Circuit(circuit_str, custom_initial_guess)
 
     circuit.fit(data_freq, impedance)

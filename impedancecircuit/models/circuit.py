@@ -7,7 +7,7 @@ from impedancecircuit.models.elements import R, C, L, CPE, p
 
 class Circuit:
     def __init__(self, circuit, parameters=None):
-        # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
+        # circuit = 'l-r-(r,cpe)-(r-cpe)-cpe'
         circuit = circuit.replace(' ', '')
         self.circuit = circuit
 
@@ -28,6 +28,7 @@ class Circuit:
 def build_circuit(circuit, parameters=None):
     # circuit = 'l-r-(r,cpe)-(r-cpe,cpe)'
     # circuit = 'l-(cpe,(cpe,r)-r)-r-(cpe,r)'
+    # circuit = 'l-r-(r,cpe)-(r-cpe)-cpe'
     circuit_list = ['l', 'r', 'r', 'cpe', 'r', 'cpe', 'cpe']
 
     # initial parameters will be determined after circuit is identified.
@@ -38,9 +39,9 @@ def build_circuit(circuit, parameters=None):
 
     def circuit_func(frequency, *parameters):
         parameters = np.array(parameters)
-        parameters = np.where(sigmoid_idx, 
-                              sigmoid(parameters), 
-                              softplus(parameters))
+        parameters = np.where(sigmoid_idx,
+                              sigmoid(parameters),
+                              np.exp(parameters))
         # parameters[sigmoid_idx] = sigmoid(parameters[sigmoid_idx])
         # parameters[softplus_idx] = softplus(parameters[softplus_idx])
         # Temporarily fixed circuit
@@ -49,24 +50,20 @@ def build_circuit(circuit, parameters=None):
             p([R([parameters[2]], frequency),
                CPE([parameters[3], parameters[4]], frequency)]) + \
             p([R([parameters[5]], frequency) +
-               CPE([parameters[6], parameters[7]], frequency),
-               CPE([parameters[8], parameters[9]], frequency)])
+               CPE([parameters[6], parameters[7]], frequency)]) + \
+            CPE([parameters[8], parameters[9]], frequency)
         z_real = np.real(z)
         z_imag = np.imag(z)
-        return np.concatenate([z_real, z_imag])
+        return np.hstack([z_real, z_imag])
     return circuit_func, parameters
 
 
 def fit_circuit(circuit_func, parameters, frequency, impedance):
     parameters, _ = curve_fit(circuit_func, frequency, impedance,
-                              p0=parameters)
+                              p0=parameters, method='lm')
     return parameters
 
 
 def sigmoid(x):
     return 1./(1.+np.exp(-x))
 
-
-def softplus(x):
-    # return np.log(1.+np.exp(x))
-    return np.log(1.+np.exp(-np.abs(x))) + np.maximum(x, 0)
