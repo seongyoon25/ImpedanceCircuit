@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
+from scipy.optimize import least_squares
 
 from impedancecircuit.models.elements import R, C, L, CPE, p
 
@@ -33,7 +33,7 @@ def build_circuit(circuit, parameters=None):
 
     # initial parameters will be determined after circuit is identified.
     if parameters is None:
-        parameters = np.zeros(10)
+        parameters = np.ones(10)
     sigmoid_idx = np.zeros(len(parameters), dtype=int)
     sigmoid_idx[[4, 7, 9]] = 1
 
@@ -49,21 +49,29 @@ def build_circuit(circuit, parameters=None):
             R([parameters[1]], frequency) + \
             p([R([parameters[2]], frequency),
                CPE([parameters[3], parameters[4]], frequency)]) + \
-            p([R([parameters[5]], frequency) +
+            p([R([parameters[5]], frequency),
                CPE([parameters[6], parameters[7]], frequency)]) + \
             CPE([parameters[8], parameters[9]], frequency)
         z_real = np.real(z)
-        z_imag = np.imag(z)
+        z_imag = -np.imag(z)
         return np.hstack([z_real, z_imag])
     return circuit_func, parameters
 
 
 def fit_circuit(circuit_func, parameters, frequency, impedance):
-    parameters, _ = curve_fit(circuit_func, frequency, impedance,
-                              p0=parameters, method='lm')
+    results = least_squares(lambda x: circuit_func(frequency, *x) - impedance,
+                            x0=parameters, method='lm', x_scale='jac')
+    parameters = results.x
     return parameters
 
 
 def sigmoid(x):
-    return 1./(1.+np.exp(-x))
+    """sigmoid function avoiding overflow
 
+    Args:
+        x (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    return np.where(x < 0, np.exp(x) / (1.+np.exp(x)), 1./(1.+np.exp(-x)))
