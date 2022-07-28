@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.insert(0, '/home/ubuntu/seongyoon/PI/Impedance')
-from impedancecircuit.models.circuit import Circuit
+from impedancecircuit.models.circuit import Circuit, sigmoid
 
 
 cellname = '25C01'
@@ -32,7 +32,13 @@ def test_circuit():
     circuit = Circuit(circuit_str, custom_initial_guess)
 
     circuit.fit(data_freq, impedance)
-    print(circuit.parameters)
+
+    sigmoid_idx = np.zeros(len(circuit.parameters), dtype=int)
+    sigmoid_idx[[4, 7, 9]] = 1
+    print(pd.Series(np.where(sigmoid_idx,
+                             sigmoid(circuit.parameters),
+                             np.exp(circuit.parameters)),
+                    index=['L', 'R0', 'R1', 'Q1', 'a1', 'R2', 'Q2', 'a2', 'Q3', 'a3']))
     impedance_pred = circuit.predict(data_freq)
     print(impedance_pred)
 
