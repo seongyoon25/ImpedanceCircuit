@@ -59,7 +59,8 @@ def build_circuit(circuit, parameters=None):
 
 
 def fit_circuit(circuit_func, parameters, frequency, impedance):
-    results = least_squares(lambda x: circuit_func(frequency, *x) - impedance,
+    results = least_squares(lambda x: np.hstack([circuit_func(frequency, *x) - impedance,
+                                                 np.abs(impedance).mean()*0.01*x]),
                             x0=parameters, method='lm', x_scale='jac')
     parameters = results.x
     return parameters
