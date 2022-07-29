@@ -42,8 +42,6 @@ def build_circuit(circuit, parameters=None):
         parameters = np.where(sigmoid_idx,
                               sigmoid(parameters),
                               np.exp(parameters))
-        # parameters[sigmoid_idx] = sigmoid(parameters[sigmoid_idx])
-        # parameters[softplus_idx] = softplus(parameters[softplus_idx])
         # Temporarily fixed circuit
         z = L([parameters[0]], frequency) + \
             R([parameters[1]], frequency) + \
