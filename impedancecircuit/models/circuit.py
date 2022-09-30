@@ -47,9 +47,9 @@ def build_circuit(circuit, parameters=None):
             R([parameters[1]], frequency) + \
             p([R([parameters[2]], frequency),
                CPE([parameters[3], parameters[4]], frequency)]) + \
-            p([R([parameters[5]], frequency),
-               CPE([parameters[6], parameters[7]], frequency)]) + \
-            CPE([parameters[8], parameters[9]], frequency)
+            p([R([parameters[5]], frequency) +
+               CPE([parameters[6], parameters[7]], frequency),
+               CPE([parameters[8], parameters[9]], frequency)])
         z_real = np.real(z)
         z_imag = -np.imag(z)
         return np.hstack([z_real, z_imag])
